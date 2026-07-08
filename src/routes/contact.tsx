@@ -19,7 +19,40 @@ export const Route = createFileRoute("/contact")({
 
 function Contact() {
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setLoading(true);
+
+  const form = e.currentTarget;
+  const formData = new FormData(form);
+
+  const body = {
+    name: formData.get("name"),
+    phone: formData.get("phone"),
+    email: formData.get("email"),
+    work_type: formData.get("work_type"),
+    message: formData.get("message"),
+  };
+
+  const res = await fetch("/api/contact", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  setLoading(false);
+
+  if (res.ok) {
+    setSent(true);
+    form.reset();
+  } else {
+    alert("A apărut o eroare. Încearcă din nou.");
+  }
+};
   return (
     <>
       <section className="bg-navy-deep text-white pt-24 pb-16 md:pt-32 md:pb-20">
@@ -52,10 +85,7 @@ function Contact() {
                   <p className="mt-2 text-muted-foreground">Am primit solicitarea ta. Te contactăm în maxim 24 de ore.</p>
                 </div>
               ) : (
-                <form
-                  onSubmit={(e) => { e.preventDefault(); setSent(true); }}
-                  className="grid gap-4"
-                >
+                <form onSubmit={onSubmit} className="grid gap-4">
                   <h2 className="text-2xl font-extrabold text-navy-deep">Formular de ofertă</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="Nume și prenume *" name="name" required />
@@ -64,7 +94,7 @@ function Contact() {
                   <Field label="Email" name="email" type="email" />
                   <div>
                     <label className="text-sm font-semibold text-navy-deep">Tip lucrare *</label>
-                    <select required className="mt-1.5 w-full rounded-lg border border-input bg-white px-4 py-3 text-navy-deep focus:outline-none focus:ring-2 focus:ring-orange">
+                    <select name="work_type"required className="mt-1.5 w-full rounded-lg border border-input bg-white px-4 py-3 text-navy-deep focus:outline-none focus:ring-2 focus:ring-orange">
                       <option value="">Alege...</option>
                       <option>Montaj acoperiș nou</option>
                       <option>Reparație acoperiș</option>
@@ -77,10 +107,11 @@ function Contact() {
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-navy-deep">Detalii proiect</label>
-                    <textarea rows={4} placeholder="Suprafață aproximativă, localitate, alte detalii..." className="mt-1.5 w-full rounded-lg border border-input bg-white px-4 py-3 text-navy-deep focus:outline-none focus:ring-2 focus:ring-orange resize-none" />
+                    <textarea name="message" rows={4} placeholder="Suprafață aproximativă, localitate, alte detalii..." className="mt-1.5 w-full rounded-lg border border-input bg-white px-4 py-3 text-navy-deep focus:outline-none focus:ring-2 focus:ring-orange resize-none" />
                   </div>
                   <button type="submit" className="btn-primary mt-2 w-full sm:w-auto">
-                    <Send className="h-5 w-5" /> Trimite solicitarea
+                    <Send className="h-5 w-5" />
+{loading ? "Se trimite..." : "Trimite solicitarea"}
                   </button>
                   <p className="text-xs text-muted-foreground">
                     Prin trimiterea formularului ești de acord cu prelucrarea datelor pentru a-ți răspunde solicitării.
