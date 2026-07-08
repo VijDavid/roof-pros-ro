@@ -1,7 +1,7 @@
-import { createAPIFileRoute } from "@tanstack/react-start/api";
+import { createServerFileRoute } from "@tanstack/react-start/server";
 import { Resend } from "resend";
 
-export const APIRoute = createAPIFileRoute("/api/contact")({
+export const ServerRoute = createServerFileRoute("/api/contact").methods({
   POST: async ({ request }) => {
     try {
       const body = await request.json();
@@ -10,7 +10,7 @@ export const APIRoute = createAPIFileRoute("/api/contact")({
 
       await resend.emails.send({
         from: "Formular Site <onboarding@resend.dev>",
-        to: process.env.CONTACT_TO_EMAIL!,
+        to: process.env.CONTACT_TO_EMAIL as string,
         subject: "Solicitare nouă de pe site",
         html: `
           <h2>Solicitare nouă</h2>
@@ -23,7 +23,8 @@ export const APIRoute = createAPIFileRoute("/api/contact")({
       });
 
       return new Response(JSON.stringify({ success: true }), { status: 200 });
-    } catch {
+    } catch (error) {
+      console.error(error);
       return new Response(JSON.stringify({ success: false }), { status: 500 });
     }
   },
