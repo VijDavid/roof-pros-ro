@@ -19,6 +19,30 @@ export const Route = createFileRoute("/contact")({
 
 function Contact() {
   const [sent, setSent] = useState(false);
+const [loading, setLoading] = useState(false);
+
+const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setLoading(true);
+
+  const formData = new FormData(e.currentTarget);
+  formData.append("access_key", "0dd89143-be2a-467b-a612-f06a2eff83ba");
+
+  const response = await fetch("https://api.web3forms.com/submit", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await response.json();
+  setLoading(false);
+
+  if (data.success) {
+    setSent(true);
+    e.currentTarget.reset();
+  } else {
+    alert("Eroare la trimitere. Încearcă din nou.");
+  }
+};
 
   return (
     <>
@@ -52,10 +76,7 @@ function Contact() {
                   <p className="mt-2 text-muted-foreground">Am primit solicitarea ta. Te contactăm în maxim 24 de ore.</p>
                 </div>
               ) : (
-                <form
-                  onSubmit={(e) => { e.preventDefault(); setSent(true); }}
-                  className="grid gap-4"
-                >
+               <form onSubmit={onSubmit} className="grid gap-4">
                   <h2 className="text-2xl font-extrabold text-navy-deep">Formular de ofertă</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="Nume și prenume *" name="name" required />
@@ -73,14 +94,19 @@ function Contact() {
                       <option>Jgheaburi și burlane</option>
                       <option>Izolații acoperiș</option>
                       <option>Altele</option>
-                    </select>
+                    <select name="work_type" required className="mt-1.5 w-full rounded-lg border border-input bg-white px-4 py-3 text-navy-deep focus:outline-none focus:ring-2 focus:ring-orange"></select>
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-navy-deep">Detalii proiect</label>
-                    <textarea rows={4} placeholder="Suprafață aproximativă, localitate, alte detalii..." className="mt-1.5 w-full rounded-lg border border-input bg-white px-4 py-3 text-navy-deep focus:outline-none focus:ring-2 focus:ring-orange resize-none" />
+<textarea
+  name="message"
+  rows={4}
+  placeholder="Suprafață aproximativă, localitate, alte detalii..."
+  className="mt-1.5 w-full rounded-lg border border-input bg-white px-4 py-3 text-navy-deep focus:outline-none focus:ring-2 focus:ring-orange resize-none"
+/>
                   </div>
                   <button type="submit" className="btn-primary mt-2 w-full sm:w-auto">
-                    <Send className="h-5 w-5" /> Trimite solicitarea
+                   <Send className="h-5 w-5" /> {loading ? "Se trimite..." : "Trimite solicitarea"}
                   </button>
                   <p className="text-xs text-muted-foreground">
                     Prin trimiterea formularului ești de acord cu prelucrarea datelor pentru a-ți răspunde solicitării.
